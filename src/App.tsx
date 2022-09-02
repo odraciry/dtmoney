@@ -4,6 +4,7 @@ import { GlobalStyle } from "./styles/global";
 import Modal from 'react-modal'
 import { useState } from "react";
 import { NewTransactionModal } from "./components/NewTransactionModal";
+import { TransactionProvider } from "./hooks/useTransaction";
 
 //definir quem é o elemento pai do modal, se nao for denido o modal será renderizado pelo body
 Modal.setAppElement('#root')
@@ -23,18 +24,20 @@ export function App() {
   }
 
   return (
-    <>
+    //Provider propriedade do context para poder compartilhar valores com toda a aplicação
+    //só é possivel consumir o conteudo desse context pq ele está por volta de toda a aplicação
+    <TransactionProvider>
       {/* aqui no header é passado a função que será executada pelo click do botao */}
-      <Header onOpenNewTransactionModal={handleOpenNewTransactionModal}/>
+      <Header onOpenNewTransactionModal={handleOpenNewTransactionModal} />
       <Dashboard />
 
       {/* importando o modal e definindo suas prorpiedades */}
-      <NewTransactionModal 
+      <NewTransactionModal
         isOpen={isNewTransactionModalOpen}
         onRequestClose={handleCloseNewTransactionModal}
       />
 
       <GlobalStyle />
-    </>
+    </TransactionProvider>
   );
 }

@@ -1,25 +1,8 @@
-import { useEffect, useState } from "react";
-import { api } from "../../services/api";
+import { useTransaction } from "../../hooks/useTransaction";
 import { Container } from "./styles";
 
-interface Transaction{
-    id: number,
-    title: string,
-    type: string,
-    category: string,
-    amount: number,
-    createAt: string,
-  }
-
 export function TransactionsTable() {
-    //array para guardar as transactions que vierem da api
-    //estou determinando que o state armazena um array de Transaction
-    const [transactions, setTransactions] = useState<Transaction[]>([])
-    //busca dos dados na api fake
-    useEffect(() => {
-        api.get('transactions')
-            .then(response => setTransactions(response.data.transactions))
-    }, [])
+    const { transactions } = useTransaction();
 
     return (
         <Container>
@@ -33,7 +16,7 @@ export function TransactionsTable() {
                     </tr>
                 </thead>
                 <tbody>
-                {/* 
+                    {/* 
                     para cada conteudo em transactions eu retorno um conteudo html populado pela transaction
                 */}
                     {transactions.map(transaction => {
@@ -41,9 +24,26 @@ export function TransactionsTable() {
                             //toda vez que se faz um map é preciso definir uma key em seu primeiro elemento
                             <tr key={transaction.id}>
                                 <td>{transaction.title}</td>
-                                <td className={transaction.type}>{transaction.amount}</td>
+                                <td className={transaction.type}>
+                                    {
+                                        //INTL biblioteca para fazer formatação de valores (nao precisa ser instalada)
+                                        new Intl.NumberFormat('pt-BR', {
+                                            style: "currency",//fromatação do tipo moeda
+                                            currency: "BRL"//tipo da moeda(real)
+                                        }).format(transaction.amount)
+                                    }
+                                </td>
                                 <td>{transaction.category}</td>
-                                <td>{transaction.createAt}</td>
+                                <td>
+
+                                    {
+
+                                        //INTL biblioteca para fazer formatação de valores (nao precisa ser instalada)
+                                        new Intl.DateTimeFormat('pt-BR').format(
+                                            new Date(transaction.createdAt)
+                                        )
+                                    }
+                                </td>
                             </tr>
                         )
                     })}

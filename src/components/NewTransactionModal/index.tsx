@@ -1,9 +1,9 @@
-import { FormEvent, useState } from 'react';
+import { FormEvent, useState, useContext } from 'react';
 import Modal from 'react-modal'
 import closeImg from '../../assets/close.svg'
 import incomeImg from '../../assets/income.svg'
 import outcomeImg from '../../assets/outcome.svg'
-import { api } from '../../services/api';
+import { useTransaction } from '../../hooks/useTransaction';
 import { Container, TransactionTypeContainer, RadioBox } from './styles';
 
 //interface para definir as propriedades do modal
@@ -14,23 +14,30 @@ interface NewTransactionModalProps {
 
 //função para retornar o modal
 export function NewTransactionModal({ isOpen, onRequestClose }: NewTransactionModalProps) {
+    const { createTransaction } = useTransaction();
+
     const [title, setTitle] = useState('')
-    const [value, setValue] = useState(0)
+    const [amount, setAmount] = useState(0)
     const [category, setCategory] = useState('')
     const [type, setType] = useState('deposit')
 
-    function handleCreateNewTransaction(event: FormEvent) {
+    async function handleCreateNewTransaction(event: FormEvent) {
         //isso faz com que o formulario nao faça as ações default, como recarregar a pagina
         event.preventDefault()
 
-        const data = {
+        await createTransaction({
             title,
+            amount,
             category,
-            value,
             type
-        };
-        
-        api.post('/transactions', data)
+        })
+
+        setTitle('')
+        setAmount(0)
+        setCategory('')
+        setType('deposit')
+
+        onRequestClose();
     }
 
     return (
@@ -60,10 +67,10 @@ export function NewTransactionModal({ isOpen, onRequestClose }: NewTransactionMo
                 <input
                     type='number'
                     placeholder='Valor'
-                    value={value}
+                    value={amount}
                     //função que executa toda vez que o valor do input mudar
                     //event.target.value para pegar o valor digitado no input
-                    onChange={event => setValue(Number(event.target.value))}
+                    onChange={event => setAmount(Number(event.target.value))}
                 />
 
                 <TransactionTypeContainer>
